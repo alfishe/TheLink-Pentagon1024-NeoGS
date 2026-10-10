@@ -19,7 +19,7 @@ jobs:
           - os: windows-latest       # windows-x64
     runs-on: ${{ matrix.os }}
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v7
 
       - name: Build (macOS, Linux)
         if: runner.os != 'Windows'
@@ -42,7 +42,7 @@ jobs:
         shell: bash
         run: cmp build/TheLink-NonDirectorsCut.scl release/TheLink-NonDirectorsCut.scl
 
-      - uses: actions/upload-artifact@v4
+      - uses: actions/upload-artifact@v7
         with:
           name: TheLink-${{ matrix.os }}
           path: build/TheLink-NonDirectorsCut.scl
