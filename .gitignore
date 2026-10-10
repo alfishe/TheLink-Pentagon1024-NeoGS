@@ -1,0 +1,97 @@
+# ---------------------------------------------------------------------------------------------------------------------
+# Build output: build.sh / build.cmd make everything in build/ again from the sources
+/build/
+
+# sjasmplus run by hand (outside build/): listings, symbols, labels, debugger and export files, logs
+*.lst
+*.sym
+*.sld
+*.exp
+*.lab
+*.labels
+*.map
+*.log
+# the objects a unit writes with SAVEBIN when it is assembled in the repository instead of build/obj
+/TUNNEL[ZG][XS]
+/ROTATE[ZG][XS]
+/ROTPREGS
+/ROTBAR[ZG][XS]
+/ROBPREGS
+/MULBAR[ZG][XS]
+/HEDGEZX[12]
+/HEDGEGS
+/BABA[ZG][XS]
+/baba5.*
+/TEX[ZG][XS]
+/thelink
+/thelink_main.bin
+/loader.bin
+/sin+
+/sectg
+/sin32768
+/uv256d
+
+# Building sjasmplus itself (tools/sjasmplus/build-sjasmplus.sh works in a temporary folder; a build in the tree leaves
+# these). The vendored binaries in tools/sjasmplus/<platform>/ are part of the repository and stay tracked
+/tools/sjasmplus/src/
+/tools/sjasmplus/build/
+*.o
+*.obj
+*.a
+*.lib
+*.pdb
+*.ilk
+CMakeCache.txt
+CMakeFiles/
+
+# Python (tools/extract_thelink.py)
+__pycache__/
+*.py[cod]
+.venv/
+
+# Emulator files made while trying the disks (snapshots, saved disks)
+*.sna
+*.z80
+*.szx
+*.rzx
+
+# ---------------------------------------------------------------------------------------------------------------------
+# macOS
+.DS_Store
+.AppleDouble
+.LSOverride
+._*
+.Spotlight-V100
+.Trashes
+.fseventsd
+.TemporaryItems
+.VolumeIcon.icns
+
+# Windows
+Thumbs.db
+Thumbs.db:encryptable
+ehthumbs.db
+ehthumbs_vista.db
+desktop.ini
+$RECYCLE.BIN/
+*.lnk
+*.stackdump
+
+# Linux
+*~
+.directory
+.Trash-*
+.nfs*
+.fuse_hidden*
+
+# Editors and IDEs
+.vscode/
+.idea/
+*.code-workspace
+*.sublime-project
+*.sublime-workspace
+*.swp
+*.swo
+*.bak
+*.tmp
+*.orig

@@ -1,0 +1,22 @@
+# Text: LF in the repository and in every checkout, so the sources hash the same everywhere
+* text=auto eol=lf
+
+# Windows scripts need CRLF (cmd's labels and goto are unreliable with LF)
+*.cmd text eol=crlf
+*.bat text eol=crlf
+
+# Spectrum files and images: bytes, never touched
+/src/data/** binary
+/materials/01-original/TheLink.trd binary
+*.scl binary
+*.trd binary
+*.png binary
+
+# The vendored assembler
+/tools/sjasmplus/macos/** binary
+/tools/sjasmplus/linux-*/** binary
+/tools/sjasmplus/windows-x64/** binary
+
+# GitHub's language statistics: the demo is Z80 assembler
+*.asm linguist-language=Assembly
+/materials/** linguist-documentation
