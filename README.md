@@ -22,7 +22,7 @@ Two disks, [`release/`](release/README.md):
 
 | | |
 |---|---|
-| [`TheLink-NonDirectorsCut.scl`](release/TheLink-NonDirectorsCut.scl) | **Non-Director's Cut** — the finished release this repository builds: boots straight into the demo, checks the machine, loads under a title picture. Insert it, `RUN` (or Enter in the TR-DOS menu) |
+| [`TheLink-NonDirectorsCut.scl`](release/TheLink-NonDirectorsCut.scl) | **Non-Director's Cut** — the finished release this repository builds: boots straight into the demo, checks the machine, loads under a title picture with a progress bar. Insert it, `RUN` (or Enter in the TR-DOS menu) |
 | [`TheLink.trd`](release/TheLink.trd) | **the original, unfinished** — the author's working disk as found: `RUN "THELINK"` assembles the demo with ALASM at every start, checks nothing, and on the wrong machine hangs without a word |
 
 Both need
@@ -30,7 +30,11 @@ Both need
 - a **Pentagon 1024** (1024K paging through `#7FFD` bits 5-7 and `#EFF7`), and
 - a **NeoGS** card (ZX-DMA; a classic General Sound has none).
 
-On anything else the Non-Director's Cut says what it found instead of hanging:
+While it loads, a bar under the title fills one segment per RAM page; if a file is missing, the
+bar gives way to a message saying which. On the wrong machine it says what it found instead of
+hanging:
+
+![Loading](docs/images/loading.png) ![A file is missing](docs/images/loading-failed.png)
 
 ![Pentagon 512](docs/images/error-512k.png) ![Classic GS](docs/images/error-classic-gs.png)
 
@@ -59,8 +63,8 @@ The Link: demo, SjASMPlus Z80 Cross-Assembler v1.23.1
   src/THELINK.asm             ok
   src/loader/loader.asm           ok
   tools/release.asm           ok
-    TheLink-NonDirectorsCut.scl: 33 files, 1172 sectors, loader #6000..#6493, main block #7800..#B154
-    TheLink-NonDirectorsCut.scl: the published disk, byte for byte (sha256 53dd7ad7...)
+    TheLink-NonDirectorsCut.scl: 33 files, 1173 sectors, loader #6000..#65C4, main block #7800..#B154
+    TheLink-NonDirectorsCut.scl: the published disk, byte for byte (sha256 5102376b...)
 ```
 
 The output is `build/TheLink-NonDirectorsCut.scl`, the Non-Director's Cut, with a listing (`build/obj/*.lst`) of

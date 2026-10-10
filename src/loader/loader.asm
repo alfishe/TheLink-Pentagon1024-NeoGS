@@ -6,8 +6,10 @@
 ;      error screen saying what was found, a key returns to BASIC;
 ;   2. loads the title picture to the screen, the demo's main block to #7800 (src/THELINK.asm)
 ;      and every page file to #C000 of its page (the table at PageFiles, the ORG #C000,page +
-;      INCBIN lines of THELINK.asm); the rest of each page is zeroed, as ALASM left it;
-;   3. jumps to GO (#7800), as ALASM's RUN did.
+;      INCBIN lines of THELINK.asm); the rest of each page is zeroed, as ALASM left it. A
+;      progress bar under the title gets one segment per page file; a missing file turns it
+;      into a message naming the file, and a key returns to BASIC;
+;   3. selects page 7 and jumps to GO (#7800), as ALASM's RUN did.
 ;
 ; TR-DOS from code: #3D13 with the function in C. #0A finds the file named at #5CDD (9 bytes
 ; compared: name and type, #5D06), #08 reads its descriptor to #5CDD, #05 reads B sectors from
@@ -49,11 +51,12 @@ Begin
         OR B
         JP NZ,MachineError
 
-        ; Title while the rest loads
+        ; Title while the rest loads, a progress bar under it
         LD HL,NameTitle
         LD DE,#4000
         CALL LoadFile
         JP C,FileError
+        CALL ProgressInit
 
         LD HL,NameMain
         LD DE,GO
@@ -90,6 +93,7 @@ Begin
         LD B,A                  ; BC = #10000 - HL
         CALL ZeroArea
 .next
+        CALL ProgressStep       ; one segment per page file
         LD DE,10
         ADD IX,DE
         JR .page
@@ -135,6 +139,160 @@ LoadFile
         ADD HL,BC
         OR A
         RET
+
+; ---------------------------------------------------------------------------------------------
+; The progress bar: under the title, a black box (attribute rows 20-22, columns 1-30) with a
+; white frame, and one white segment per page file (28: screen columns 2-29, 6 pixels of each
+; byte, 12 lines). Every segment is a whole byte, so a segment is one write per line.
+
+BAR_TOP   EQU 166                 ; the first pixel line of the segments
+BAR_LINES EQU 12
+BAR_COL   EQU 2                   ; the screen column of segment 0
+
+ProgressInit
+        LD A,#47                  ; the box: bright white ink on black paper
+        CALL BarBox
+        LD A,163                  ; the frame: lines 163 and 180, x = 12..243
+        CALL FrameLine
+        LD A,180
+        CALL FrameLine
+        LD A,164                  ; and x = 12 and x = 243 on the lines between
+.side
+        PUSH AF
+        LD C,1
+        CALL PixelAddress
+        LD A,(HL)
+        OR #08                    ; x = 12: column 1, bit 3
+        LD (HL),A
+        POP AF
+        PUSH AF
+        LD C,30
+        CALL PixelAddress
+        LD A,(HL)
+        OR #10                    ; x = 243: column 30, bit 4
+        LD (HL),A
+        POP AF
+        INC A
+        CP 180
+        JR NZ,.side
+        XOR A
+        LD (segment),A
+        INC A
+        LD (barShown),A
+        RET
+
+; The box under the title in attribute A: rows 20-22, columns 1-30, its pixels cleared
+BarBox
+        LD C,A
+        LD HL,#5800+20*32+1
+        LD B,3
+.attr
+        PUSH BC
+        PUSH HL
+        LD (HL),C
+        LD D,H
+        LD E,L
+        INC DE
+        LD BC,29
+        LDIR
+        POP HL
+        LD DE,32
+        ADD HL,DE
+        POP BC
+        DJNZ .attr
+        LD A,160                  ; lines 160-183
+.clear
+        PUSH AF
+        LD C,1
+        CALL PixelAddress
+        LD (HL),0
+        LD D,H
+        LD E,L
+        INC DE
+        LD BC,29
+        LDIR
+        POP AF
+        INC A
+        CP 184
+        JR NZ,.clear
+        RET
+
+; A file did not load after the bar appeared (HL -> its name): the bar gives way to the
+; message, in the same box, under the title
+BarError
+        PUSH HL
+        LD IY,#5C3A
+        LD A,#57                  ; bright white ink on red paper
+        CALL BarBox
+        LD (IY+#31),0             ; DF_SZ = 0: the upper screen has all 24 lines (row 22 is the box's)
+        LD A,2
+        CALL #1601                ; channel 'S'
+        LD HL,TxtBarFail
+        CALL Print
+        POP HL
+        CALL PrintName
+        LD HL,TxtBarKey
+        CALL Print
+        JP WaitKey
+
+; Pixel line A, x = 12..243
+FrameLine
+        LD C,1
+        CALL PixelAddress
+        LD (HL),#0F
+        INC L
+        LD B,28
+.byte
+        LD (HL),#FF
+        INC L
+        DJNZ .byte
+        LD (HL),#F0
+        RET
+
+; The next segment
+ProgressStep
+        LD A,(segment)
+        LD C,A
+        INC A
+        LD (segment),A
+        LD A,C
+        ADD A,BAR_COL
+        LD C,A
+        LD A,BAR_TOP
+        LD B,BAR_LINES
+.line
+        PUSH AF
+        CALL PixelAddress
+        LD (HL),%01111110
+        POP AF
+        INC A
+        DJNZ .line
+        RET
+
+; HL = the screen address of pixel line A (0-191) at column C (0-31); keeps B, C, DE
+PixelAddress
+        LD H,A
+        AND 7
+        OR #40
+        LD L,A
+        LD A,H
+        AND #C0
+        RRCA
+        RRCA
+        RRCA
+        OR L
+        LD L,A                    ; the high byte: #40 + the third + the line in the cell
+        LD A,H
+        AND #38
+        RLCA
+        RLCA
+        OR C                      ; the low byte: the character row + the column
+        LD H,L
+        LD L,A
+        RET
+
+segment  DB 0                     ; segments drawn
+barShown DB 0                     ; 1 once the bar is on screen: a failure shows in its box
 
 ; Zero BC bytes from HL (BC >= 1)
 ZeroArea
@@ -275,29 +433,20 @@ MachineError
         JR WaitKeyAndLeave
 
 FileError
+        LD A,(barShown)
+        OR A
+        JP NZ,BarError
         PUSH HL
         CALL ErrorBox
         LD HL,TxtNoFile
         CALL Print
         POP HL
-        LD B,9
-.name
-        LD A,(HL)
-        PUSH HL
-        PUSH BC
-        CP 32
-        JR NC,.char
-        LD A,'?'
-.char
-        RST #10
-        POP BC
-        POP HL
-        INC HL
-        DJNZ .name
+        CALL PrintName
 
 WaitKeyAndLeave
         LD HL,TxtKey
         CALL Print
+WaitKey
         EI
 .release
         XOR A
@@ -319,6 +468,7 @@ WaitKeyAndLeave
         LD (#5C48),A            ; BORDCR: white border, black ink
         LD A,#38
         LD (#5C8D),A            ; ATTR_P: black on white
+        LD (IY+#31),2           ; DF_SZ back to BASIC's 2 lines (the bar's message set it to 0)
         CALL #0D6B              ; CLS
         RET                     ; back to BASIC
 
@@ -370,6 +520,35 @@ ErrorBox
         LD HL,TxtTitle
         ; fall through
 
+; HL -> a 9-character TR-DOS name and type: printed as name.T (the name without its trailing blanks)
+PrintName
+        LD D,H
+        LD E,L                    ; DE = the name
+        LD B,8
+.char
+        LD A,(HL)
+        CP 33
+        JR C,.type                ; a blank ends the name
+        PUSH HL
+        PUSH BC
+        PUSH DE
+        RST #10
+        POP DE
+        POP BC
+        POP HL
+        INC HL
+        DJNZ .char
+.type
+        PUSH DE
+        LD A,'.'
+        RST #10
+        POP HL
+        LD BC,8
+        ADD HL,BC
+        LD A,(HL)                 ; the type, the 9th byte
+        RST #10
+        RET
+
 ; HL -> text with control codes, #FF ends it
 Print
         LD A,(HL)
@@ -406,6 +585,9 @@ TxtNoFile TXT 8,4
           DB "A file is missing:"
           TXT 10,6
           DB 16,6,#FF                 ; the name follows here, in yellow
+TxtBarFail DB 22,20,9,16,7,17,2,19,1,"LOADING FAILED"
+          DB 22,21,3,"File not found: ",#FF
+TxtBarKey  DB 22,22,9,"Press any key",#FF
 TxtKey    TXT 16,4
           DB "Press any key.",#FF
 

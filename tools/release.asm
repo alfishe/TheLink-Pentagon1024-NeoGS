@@ -58,9 +58,9 @@
                 -- #7800..#B154 as ALASM assembles THELINK.asm (14677 bytes)
                 thelink = "d1df30757f04f5ac302bd62e1c82f6a1bee2f63c95e0238b4454ff1dd302b147",
             }
-            -- The disks as published (materials/02-addons/README.md): stage 2 and the final build are the same disk
+            -- The disks as published (materials/02-addons/README.md): the final build is stage 2 plus the progress bar
             local DISK = {
-                final = "53dd7ad7a007f74adcc60316c19d3632e506a1df54a93b0943c25334f9ee704d",
+                final = "5102376be31748368993c275bcd9dcd834e5ed131feee115ecd3bc46a9d0af22",
                 ["1"] = "ff5a446eef0fba2300d136e89721f766733229c4042f8619caf6417483851ada",
                 ["2"] = "53dd7ad7a007f74adcc60316c19d3632e506a1df54a93b0943c25334f9ee704d",
             }

@@ -190,8 +190,16 @@ loaded, the music, and 733 bytes of the player (`#1800`-`#1AFF` of `thelinkm`) w
 picture was the same frame for frame, so the screen compare missed it; a compare of the page
 with the file found it. The loader now selects `#17` itself before `JP GO`.
 
+**Progress.** Once the title is on screen the loader draws a black box under it, with a white
+frame, and fills one white segment of it after each of the 28 page files. Each segment is 6
+pixels of one screen byte, 12 lines high, so a segment is one byte written per line. If a file
+cannot be found after the bar has appeared, the box turns red and says which file, the title
+staying above it; a key returns to BASIC.
+
+![Loading](images/loading.png) ![A file is missing](images/loading-failed.png)
+
 **Disk.** `boot` (autostart, one line, prints nothing) runs `THELINK`; `THELINK` loads the
-loader and starts it. Files in load order, 33 in all, 1172 sectors - the SCL fits any 640K
+loader and starts it. Files in load order, 33 in all, 1173 sectors - the SCL fits any 640K
 disk, and the loader finds its files by name wherever they land.
 
 ## 5. Verification

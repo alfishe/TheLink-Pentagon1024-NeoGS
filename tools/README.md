@@ -91,7 +91,7 @@ The last step, in four parts:
    `boot`, `THELINK`, `loader`, the title `thelink$`, `thelink` and the 28 page files in the
    order of the loader's table ([release/README.md](../release/README.md)).
 4. **The published disk.** It compares the SHA-256 of the SCL with the published one
-   (`53dd7ad7...` for the demo; each stage has its own).
+   (`5102376b...` for the demo; each stage has its own).
 
 | Define | |
 |---|---|
