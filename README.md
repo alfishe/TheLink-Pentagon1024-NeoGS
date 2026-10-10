@@ -109,7 +109,11 @@ what the card computes and how the Spectrum puts it on screen.
 
 ## Learn
 
-The [tutorial](docs/tutorial/README.md), for readers who know Z80 assembler and the Spectrum 128:
+The short version — the whole idea on one page, in the ZX Spectrum knowledge base:
+**[Case study: "The Link" — a sound card used as a graphics coprocessor](https://github.com/alfishe/speccy-bootcamp/blob/main/07_demoscene/thelink_case_study.md)**
+(ZX-DMA, the frame handshake, the interrupt-safe blits, the pitfalls, what an emulator must do).
+
+The long version, the [tutorial](docs/tutorial/README.md), for readers who know Z80 assembler and the Spectrum 128:
 
 | # | Chapter | |
 |---|---|---|
